@@ -1,0 +1,81 @@
+yum -y install git
+
+su -c "psql -c 'CREATE DATABASE gogs;'" - postgres
+wget https://dl.gogs.io/0.11.19/linux_amd64.zip
+unzip linux_amd64.zip
+cd gogs
+
+mkdir /var/git
+
+mkdir -p custom/conf
+# create custom/conf/app.ini file with contents:
+#     replace DBPASSWORD with DB password and
+#     YOURSECRETKEY with a random key
+# ==============================================
+# APP_NAME = nCode Git Service
+# RUN_MODE = prod
+# RUN_USER = git
+# 
+# [repository]
+# ROOT = /var/git
+# 
+# [server]
+# DOMAIN       = git.ncode.si
+# HTTP_PORT    = 3000
+# ROOT_URL     = http://git.ncode.si:3000/
+# DISABLE_SSH  = false
+# SSH_PORT     = 22
+# OFFLINE_MODE = false
+# 
+# [database]
+# DB_TYPE    = postgres
+# HOST       = 127.0.0.1:5432
+# USER       = postgres
+# PASSWD     = DBPASSWORD
+# SECRET_KEY = YOURSECRETKEY
+# NAME       = gogs
+# SSL_MODE   = disable
+# PATH       = data/gogs.db
+# 
+# [service]
+# DISABLE_REGISTRATION   = true
+# REGISTER_EMAIL_CONFIRM = false
+# ENABLE_NOTIFY_MAIL     = false
+# ENABLE_CAPTCHA         = true
+# REQUIRE_SIGNIN_VIEW    = false
+# 
+# [mailer]
+# ENABLED = false
+# 
+# [picture]
+# DISABLE_GRAVATAR = false
+# 
+# [session]
+# PROVIDER = file
+# 
+# [log]
+# MODE      = file
+# LEVEL     = Info
+# ROOT_PATH = /home/git/gogs/log
+# 
+# [security]
+# INSTALL_LOCK = true
+# SECRET_KEY   = rxgSXG76HftiDC9
+
+
+useradd git
+chown git:git /var/git
+
+mv /root/gogs /home/git/gogs
+chown -R git:git /home/git/gogs
+
+cp /home/git/gogs/scripts/systemd/gogs.service /etc/systemd/system/
+chmod 664 /etc/systemd/system/gogs.service
+systemctl daemon-reload
+systemctl enable gogs.service
+systemctl start gogs.service
+
+#### to run manually: su -c "/home/git/gogs/gogs web" - git
+
+# go to http://git.ncode.si:3000
+# create an Admin account, if needed

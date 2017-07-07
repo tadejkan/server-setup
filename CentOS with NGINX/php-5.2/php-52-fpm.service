@@ -1,0 +1,14 @@
+[Unit]
+Description=The PHP 5.2 FastCGI Process Manager
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/php-fpm/php-52-fpm.pid
+ExecStart=/opt/php-5.2/sbin/php-fpm start
+ExecReload=/bin/kill -USR2 $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

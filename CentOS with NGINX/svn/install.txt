@@ -1,0 +1,18 @@
+useradd -r -s /bin/false svn
+
+mkdir /var/run/svnserve
+chown svn:svn /var/run/svnserve
+
+mkdir /var/log/svnserve
+chown svn:svn /var/log/svnserve
+
+# copy svnserve.service and svnserve-home.service to /usr/lib/systemd/system
+
+systemctl enable svnserve.service
+systemctl start svnserve.service
+
+systemctl enable svnserve-home.service
+systemctl start svnserve-home.service
+
+touch /var/log/post-commit.log
+chown svn:svn /var/log/post-commit.log

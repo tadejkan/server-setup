@@ -1,0 +1,13 @@
+[Unit]
+Description=Svnserve (home)
+After=syslog.target network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/svnserve/svnserve-home.pid
+ExecStart=/usr/bin/svnserve -d --pid-file /var/run/svnserve/svnserve-home.pid -r /var/svn/svn.home --log-file /var/log/svnserve/svnserve-home.log --listen-port 3691
+User=svn
+Group=svn
+
+[Install]
+WantedBy=multi-user.target

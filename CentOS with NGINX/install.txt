@@ -1,0 +1,293 @@
+################################
+## LOCK ROOT LOGIN TO SSH KEY ##
+################################
+
+# put your public key on server
+echo "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAwH2B9CO2veoRQWCL5FU8pA6Q4UHRyK5zAMUw0KchG1hpIslg1C3Un+nJhtY/Pskxswm+IabMZ5PcrmWk2v6MxAgZ1sjpuY4zKcwz2FcgHSvHE5jVRMLjjgaXKsOKXvs4aYAnaAO3UuBxE9fMwFZTuaRlTg/PNIcyvT58fpvS3yl5QyuIo2IzRModjxgmSzNg8kBluvaRPRhBfx2BSOVcfWIdYrLftixkIRFAakT3mVc0GRaBjGjKcesPCjVaUbeZSYx/Hi2nU7+73CqkAvifTq1e5LdsxDJIo3oZnkeZ5MlQ/gbBZcnE1szUUiy0Mu301vq3IkSp7E88OCA6d4hGGw== tadej@ncode.si" >> /root/.ssh/authorized_keys
+
+# remove password login for root
+passwd --lock root
+
+#################
+## BASIC SETUP ##
+#################
+
+yum -y update
+
+rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
+cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.mainline.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
+
+###################
+## INSTALL PHP 7 ##
+###################
+
+yum -y install php70w php70w-opcache php70w-cli php70w-common php70w-mysqlnd php70w-pgsql php70w-mbstring php70w-gd php70w-mcrypt php70w-intl php70w-fpm php70w-xml
+
+mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf.bck
+
+# copy php-7.0/pool/site.conf.template to /etc/php-fpm.d/
+# duplicate for every site and edit it
+
+# php.ini
+#    change upload_max_filesize = 2M to upload_max_filesize = 100M
+#    set cgi.fix_pathinfo=0
+
+systemctl enable php-fpm.service
+
+#####################
+## INSTALL PHP 5.3 ##
+#####################
+
+yum -y groupinstall 'Development Tools'
+yum -y install libxml2-devel libXpm-devel gmp-devel libicu-devel t1lib-devel aspell-devel openssl-devel bzip2-devel libcurl-devel libjpeg-devel libvpx-devel libpng-devel freetype-devel readline-devel libtidy-devel libxslt-devel libmcrypt-devel pcre-devel curl-devel mysql-devel ncurses-devel gettext-devel net-snmp-devel libevent-devel libtool-ltdl-devel libc-client-devel postgresql-devel
+
+cd /root/
+wget http://at1.php.net/distributions/php-5.3.29.tar.gz
+tar -zxvf php-5.3.29.tar.gz
+cd php-5.3.29
+
+./configure \
+    --prefix=/opt/php-5.3 \
+    --with-pdo-pgsql \
+    --with-zlib-dir \
+    --with-freetype-dir \
+    --enable-mbstring \
+    --with-libxml-dir=/usr \
+    --enable-soap \
+    --enable-calendar \
+    --with-curl \
+    --with-mcrypt \
+    --with-zlib \
+    --with-gd \
+    --with-pgsql \
+    --disable-rpath \
+    --enable-inline-optimization \
+    --with-bz2 \
+    --with-zlib \
+    --enable-sockets \
+    --enable-sysvsem \
+    --enable-sysvshm \
+    --enable-pcntl \
+    --enable-mbregex \
+    --with-mhash \
+    --enable-zip \
+    --with-pcre-regex \
+    --with-mysql \
+    --with-pdo-mysql \
+    --with-mysqli \
+    --with-jpeg-dir=/usr \
+    --with-png-dir=/usr \
+    --enable-gd-native-ttf \
+    --with-openssl \
+    --with-fpm-user=nginx \
+    --with-fpm-group=nginx \
+    --with-libdir=lib64 \
+    --enable-ftp \
+    --with-imap \
+    --with-imap-ssl \
+    --with-kerberos \
+    --with-gettext \
+    --enable-fpm \
+    --enable-intl \
+    --enable-mysqlnd
+
+sed -i '/EXTRA_LIBS = /s|$| -lstdc++|' Makefile
+
+make
+make install
+
+cp php.ini-production /opt/php-5.3/lib/php.ini
+
+mkdir /opt/php-5.3/etc/pool.d
+mkdir /var/run/php-53-fpm
+
+# copy file php-5.3/php-fpm.conf to /opt/php-5.3/etc/php-fpm.conf
+
+# copy php-5.3/pool/site.conf.template to /opt/php-5.3/etc/pool.d/
+# duplicate for every site and edit it
+
+# copy file php-5.3/php-53-fpm.service to /usr/lib/systemd/system
+
+# php.ini
+#    change upload_max_filesize = 2M to upload_max_filesize = 100M
+#    set cgi.fix_pathinfo=0
+
+systemctl enable php-53-fpm.service
+
+#####################
+## INSTALL PHP 5.2 ##
+#####################
+
+#cd /root/
+#wget http://museum.php.net/php5/php-5.2.17.tar.gz
+#tar -zxvf php-5.2.17.tar.gz
+#cd php-5.2.17
+#
+#wget -c -t 3 -O ./libxml29_compat.patch https://mail.gnome.org/archives/xml/2012-August/txtbgxGXAvz4N.txt
+#patch -p0 -b < libxml29_compat.patch
+#
+#wget -c -t 3 -O - http://php-fpm.org/downloads/php-5.2.17-fpm-0.5.14.diff.gz | gunzip > ./php-5.2.17-fpm-0.5.14.patch
+#patch -p1 < php-5.2.17-fpm-0.5.14.patch
+#
+#./configure \
+#    --prefix=/opt/php-5.2 \
+#    --with-gd \
+#    --with-curl \
+#    --with-mysql=mysqldn \
+#    --with-libdir=lib64 \
+#    --with-freetype-dir \
+#    --enable-mbstring \
+#    --with-jpeg-dir \
+#    --enable-fastcgi \
+#    --enable-fpm
+#
+#make
+#make install
+#
+#cp php.ini-recommended /opt/php-5.2/lib/php.ini
+#
+## php.ini
+##    change upload_max_filesize = 2M to upload_max_filesize = 100M
+##    set cgi.fix_pathinfo=0
+#
+#mkdir /var/run/php-52-fpm
+#
+## copy file php-5.2/php-fpm.conf to /opt/php-5.2/etc/php-fpm.conf
+## edit php-fpm.conf, add all required sites in <workers>
+#
+## copy file php-5.2/php-52-fpm.service to /usr/lib/systemd/system
+#
+#systemctl enable php-52-fpm.service
+
+
+####
+# TODO: change that dangerous setting in php.ini !
+# cgi.fix_pathinfo=0
+####
+
+###################
+## INSTALL NGINX ##
+###################
+
+yum -y install nginx nginx-module-geoip nginx-module-image-filter nginx-module-njs nginx-module-xslt
+
+mkdir /etc/nginx/vhosts
+
+# copy etc/nginx/nginx.conf to /etc/nginx/
+# copy etc/nginx/fastcgi_params to /etc/nginx/
+# copy etc/nginx/conf.d/gzip.conf to /etc/nginx/conf.d/
+# copy etc/nginx/vhosts/site.conf.template to /etc/nginx/vhosts/
+
+systemctl enable nginx.service
+
+#################
+## START STUFF ##
+#################
+
+systemctl start php-fpm.service
+systemctl start php-53-fpm.service
+#systemctl start php-52-fpm.service
+
+systemctl start nginx.service
+
+######################
+## INSTALL IPTABLES ##
+######################
+
+yum -y install iptables-services
+
+# copy etc/sysconfig/iptables to /etc/sysconfig/
+
+systemctl enable iptables.service
+systemctl start iptables.service
+
+###########
+## MYSQL ##
+###########
+
+yum -y install mariadb mariadb-libs mariadb-server
+systemctl enable mariadb.service
+systemctl start mariadb.service
+# mysql_secure_installation
+# CREATE USER 'username'@'%' IDENTIFIED BY 'password';
+# GRANT ALL PRIVILEGES ON `database`.* TO 'user'@'%';
+
+################
+## POSTGRESQL ##
+################
+
+yum -y install https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+yum -y install postgresql96-server postgresql96-contrib
+
+systemctl enable postgresql-9.6.service
+/usr/pgsql-9.6/bin/postgresql96-setup initdb
+
+sed -i "s/#listen_addresses.*/listen_addresses = '*'/" /var/lib/pgsql/9.6/data/postgresql.conf
+sed -i "s/host    all             all             127.0.0.1\/32            ident.*/host    all         all         0.0.0.0\/0    md5/" /var/lib/pgsql/9.6/data/pg_hba.conf
+sed -i "s/host    all             all             ::1\/128                 ident.*/host    all             all             ::1\/128                 md5/" /var/lib/pgsql/9.6/data/pg_hba.conf
+
+systemctl start postgresql-9.6.service
+
+su -c "psql -c \"ALTER USER postgres WITH PASSWORD 'yourpassword';\"" - postgres # don't forget to change it to your password
+
+# CREATE ROLE myuser LOGIN PASSWORD 'mypassword' CREATEDB;
+# -- login as myuser; psql -h 127.0.0.1 -U myuser -W postgres
+# CREATE DATABASE "yourdatabase";
+# REVOKE connect ON DATABASE "yourdatabase" FROM PUBLIC;
+
+touch /var/swap.img
+chmod 600 /var/swap.img
+dd if=/dev/zero of=/var/swap.img bs=1024k count=1000
+mkswap /var/swap.img
+swapon /var/swap.img
+echo "/var/swap.img    none    swap    sw    0    0" >> /etc/fstab
+
+###########
+## REDIS ##
+###########
+
+yum -y install redis
+systemctl enable redis.service
+systemctl start redis.service
+
+###################
+## Let's Encrypt ##
+###################
+
+yum -y install epel-release certbot
+
+mkdir /etc/nginx/ssl
+openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048
+
+################
+## SETUP CRON ##
+################
+
+echo "30 2 * * * PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin && date >> /var/log/certbot.log && /usr/bin/certbot renew >> /var/log/certbot.log && /usr/bin/systemctl reload nginx.service" >> /var/spool/cron/root
+
+#############
+## SELINUX ##
+#############
+
+setenforce Permissive
+#nano /etc/sysconfig/selinux and change
+# SELINUX=disabled
+# to
+# SELINUX=permissive
+
+############################
+## HOW TO SECURE A FOLDER ##
+############################
+
+# (replace {USERNAME} with a username and {SITE} with your site)
+sh -c "echo -n 'USERNAME:' >> /etc/nginx/.{SITE}-htpasswd"
+sh -c "openssl passwd -apr1 >> /etc/nginx/.{SITE}-htpasswd"
+
+# add this to SITE vhost under location
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+        auth_basic "DEV";
+        auth_basic_user_file /etc/nginx/.{SITE}-htpasswd;
+    }

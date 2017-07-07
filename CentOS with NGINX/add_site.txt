@@ -1,0 +1,73 @@
+Note:
+- replace {SITE}, {SITE_SIMPLE}, {USER} and {PASSWORD} with appropriate values
+- {SITE_SIMPLE} should be similar to {SITE}, but simplified: dashes replaced with underscores, dots replaced with underscores, etc., e.g. sozitje_hrastnik_si
+- {USER} should be prefixed with "site__"
+
+Examples:
+- {SITE}: dev.sozitje-hrastnik.si
+- {SITE_SIMPLE}: dev_sozitje_hrastnik_si
+- {USER}: site__dev_sozitje_hrastnik_si
+
+1. create directory on server
+	mkdir -p /var/www/{SITE}/public
+
+2. create user for site
+	adduser {USER}
+	
+	usermod -a -G {USER} nginx
+
+3. change directory owner
+	chown -R {USER}:{USER} /var/www/{SITE}
+
+4. [optional] create PHP FPM pool config file (either for PHP 5.3 or 7.0)
+	cp site.conf.template {SITE}.conf
+	# open file and replace SITE with {SITE} and USER with {USER}
+	# put config file on server
+	systemctl restart php-fpm.service # or php-53-fpm.service
+
+5. create NGINX vhost config file
+	cp site.conf.template {SITE}.conf # or copy from site-new-cms.conf.template, site-old-cms.conf.template or site-static.conf.template (if no PHP is needed and you skipped #4)
+	# open file and
+	#    replace SITE with {SITE}
+	#    if running under PHP 5.3, delete the current fastcgi_pass line and uncomment the one below it
+	#    change/add/remove any other configuration values
+	#    
+	#    if you want SSL, uncomment these lines:
+	#        listen 443 ssl http2;
+	#        ssl_certificate /etc/letsencrypt/live/SITE/fullchain.pem;
+	#        .......
+	#        #add_header Strict-Transport-Security max-age=15768000;
+	
+	# if you uncommented SSL above, then you need to generate an SSL certificate for the site:
+	certbot certonly --manual --preferred-challenges dns -d SITE,www.SITE
+	
+	# put config file on server
+	systemctl reload nginx.service # maybe we need "restart", because of usermod; test!
+
+6. [optional] create database
+	MySQL
+		run as root
+			CREATE USER '{SITE_SIMPLE}'@'%' IDENTIFIED BY '{PASSWORD}';
+			CREATE DATABASE `{SITE}`;
+			GRANT ALL PRIVILEGES ON `{SITE}`.* TO '{SITE_SIMPLE}'@'%';
+	
+	PostgreSQL
+		run as root
+			CREATE ROLE "{SITE_SIMPLE}" LOGIN PASSWORD '{PASSWORD}' CREATEDB;
+		
+		run as {SITE_SIMPLE} user
+			CREATE DATABASE "{SITE}";
+
+7. when uploading files, don't forget to change owner
+	chown -R {USER}:{USER} /var/www/{SITE} # or via another method, like WinSCP
+	
+	# also, change permissions
+	#    most files should have chmod -R 0550 PATTERN/PATH
+	#    writable files/folders should have chmod -R 0750 PATTERN/PATH
+	# for NEW CMS sites that means:
+	chmod -R 0550 /var/www/{SITE}
+	chmod -R 0750 /var/www/{SITE}/storage
+	chmod -R 0750 /var/www/{SITE}/public/uploads
+
+8. if you generated an SSL certificate in step 5, generate it again to setup for auto renewal
+	certbot certonly -a webroot --webroot-path=/var/www/SITE/public -d SITE,www.SITE
