@@ -1,81 +1,50 @@
 Note:
-- replace {SITE}, {SITE_SIMPLE}, {USER} and {PASSWORD} with appropriate values
+- replace {SITE}, {SITE_SIMPLE}, {USER}, {PASSWORD} and {GIT_REPO} with appropriate values
 - {SITE_SIMPLE} should be similar to {SITE}, but simplified: dashes replaced with underscores, dots replaced with underscores, etc.
 - {USER} should be prefixed with "site__", e.g. site__sozitje_hrastnik_si
-
+- {GIT_REPO} should be git repo URL, e.g. git@git.ncode.si:tadej/sozitje-hrastnik-si.git
 
 #1. create private/public certificate
-	ssh-keygen -t rsa -f /var/ssh/site__divinitas_net_deploy_key # without password
-	chown site__divinitas_net:site__divinitas_net /var/ssh/site__divinitas_net_deploy_key*
-	chmod 0600 /var/ssh/site__divinitas_net_deploy_key
+	ssh-keygen -t rsa -f /var/ssh/{USER}_deploy_key # without password
+	chown {USER}:{USER} /var/ssh/{USER}_deploy_key*
+	chmod 0600 /var/ssh/{USER}_deploy_key
+	
+	mkdir /home/{USER}/.ssh
+	touch /home/{USER}/.ssh/known_hosts
+	printf "Host git.ncode.si\n  StrictHostKeyChecking no\n" > /home/{USER}/.ssh/config
+	chown -R {USER}:{USER} /home/{USER}/.ssh
+	chmod -R 0700 /home/{USER}/.ssh
 
-	ssh-keygen -t rsa -f /var/ssh/site__divinitas_net_deploy_key # without password
-	chown site__divinitas_net:site__divinitas_net /var/ssh/site__divinitas_net_deploy_key*
-	chmod 0600 /var/ssh/site__divinitas_net_deploy_key
-	
-	
-	
-	mkdir /home/site__divinitas_net/.ssh
-	touch /home/site__divinitas_net/.ssh/known_hosts
-	printf "Host git.ncode.si\n  StrictHostKeyChecking no\n" > /home/site__divinitas_net/.ssh/config
-	chown -R site__divinitas_net:site__divinitas_net /home/site__divinitas_net/.ssh
-	chmod -R 0700 /home/site__divinitas_net/.ssh
-	
-	
-	
-	mkdir /home/site__divinitas_net/.ssh
-	touch /home/site__divinitas_net/.ssh/known_hosts
-	printf "Host git.ncode.si\n  StrictHostKeyChecking no\n" > /home/site__divinitas_net/.ssh/config
-	chown -R site__divinitas_net:site__divinitas_net /home/site__divinitas_net/.ssh
-	chmod -R 0700 /home/site__divinitas_net/.ssh
-
-#2. add contents of /var/ssh/site__divinitas_net_deploy_key.pub to Gogs under Deploy Keys
+#2. add contents of /var/ssh/{USER}_deploy_key.pub to Gogs under Deploy Keys
 
 #3. initial clone
-	# delete any files/folders in destination dir (/var/www/divinitas.net)
+	# delete any files/folders in destination dir (/var/www/{SITE})
 	
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git clone git@git.ncode.si:tadej/divinitas-net.git --separate-git-dir /var/ssh/.git_site__divinitas_net /var/www/divinitas.net'
+	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git clone {GIT_REPO} --separate-git-dir /var/ssh/.git_{USER} /var/www/{SITE}'
 	
-	# switch branch if needed, e.g. to switch to "development" branch do this
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/divinitas.net fetch'
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/divinitas.net checkout production'
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/divinitas.net pull'
-
-
-	
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git clone git@git.ncode.si:tadej/upn-qr-si.git --separate-git-dir /var/ssh/.git_site__divinitas_net /var/www/upn-qr.si'
-	
-	# switch branch if needed, e.g. to switch to "development" branch do this
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/upn-qr.si fetch'
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/upn-qr.si checkout production'
-	ssh-agent bash -c 'ssh-add /var/ssh/site__divinitas_net_deploy_key; git --git-dir=/var/ssh/.git_site__divinitas_net --work-tree=/var/www/upn-qr.si pull'
-
+	# switch branch if needed, e.g. to switch to "production" branch do this
+	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git --git-dir=/var/ssh/.git_{USER} --work-tree=/var/www/{SITE} fetch'
+	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git --git-dir=/var/ssh/.git_{USER} --work-tree=/var/www/{SITE} checkout production'
+	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git --git-dir=/var/ssh/.git_{USER} --work-tree=/var/www/{SITE} pull'
 	
 #4. set deploy secret
 	
-	# set random string in /var/www/divinitas.net/.deploy_secret file
+	# set random string in /var/www/{SITE}/.deploy_secret file
 
 #5. change owners
-	chown -R site__divinitas_net:site__divinitas_net /var/ssh/.git_site__divinitas_net
-	chown -R site__divinitas_net:site__divinitas_net /var/www/divinitas.net
-	chmod -R 0750 /var/www/divinitas.net # 7 needed as it gives write privilege to our user
-
-	chown -R site__divinitas_net:site__divinitas_net /var/ssh/.git_site__divinitas_net
-	chown -R site__divinitas_net:site__divinitas_net /var/www/divinitas.net
-	chmod -R 0750 /var/www/divinitas.net # 7 needed as it gives write privilege to our user
+	chown -R {USER}:{USER} /var/ssh/.git_{USER}
+	chown -R {USER}:{USER} /var/www/{SITE}
+	chmod -R 0750 /var/www/{SITE} # 7 needed as it gives write privilege to our user
 
 #6. setup composer
 
-	mkdir -p /var/composer/site__divinitas_net
-	chown site__divinitas_net:site__divinitas_net /var/composer/site__divinitas_net
-	
-	mkdir -p /var/composer/site__divinitas_net
-	chown site__divinitas_net:site__divinitas_net /var/composer/site__divinitas_net
+	mkdir -p /var/composer/{USER}
+	chown {USER}:{USER} /var/composer/{USER}
 
 #7. add Webhook to Gogs repository
 	
 	# should be Gogs type webhook
-	# enter https://divinitas.net/deploy.php under Payload URL
+	# enter https://{SITE}/deploy.php under Payload URL
 	# select application/x-www-form-urlencoded under Content Type
 	# enter string from .deploy_secret under Secret
 	# click Add Webhook
