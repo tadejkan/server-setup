@@ -1,8 +1,13 @@
 Note:
-- replace {SITE}, {SITE_SIMPLE}, {USER}, {PASSWORD} and {GIT_REPO} with appropriate values
-- {SITE_SIMPLE} should be similar to {SITE}, but simplified: dashes replaced with underscores, dots replaced with underscores, etc.
+- replace {SITE}, {USER} and {GIT_REPO} with appropriate values
 - {USER} should be prefixed with "site__", e.g. site__sozitje_hrastnik_si
 - {GIT_REPO} should be git repo URL, e.g. git@git.ncode.si:tadej/sozitje-hrastnik-si.git
+
+#0. preparation
+
+	mkdir /var/ssh
+	yum -y install git
+	# site needs to have a deploy.php file in it's public folder (see deploy.php for example)
 
 #1. create private/public certificate
 	ssh-keygen -t rsa -f /var/ssh/{USER}_deploy_key # without password
