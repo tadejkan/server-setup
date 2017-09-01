@@ -38,11 +38,13 @@ Examples:
 	#        .......
 	#        #add_header Strict-Transport-Security max-age=15768000;
 	
-	# if you uncommented SSL above, then you need to generate an SSL certificate for the site:
-	certbot certonly --manual --preferred-challenges dns -d SITE,www.SITE
-	
 	# put config file on server
 	systemctl reload nginx.service # maybe we need "restart", because of usermod; test!
+	
+	# if you uncommented SSL above, then you need to generate an SSL certificate for the site:
+	certbot certonly -a webroot --webroot-path=/var/www/{SITE}/public -d {SITE},www.{SITE}
+	#   or use alternative method, via DNS (but that's not auto renewable, or is it? check):
+	#       certbot certonly --manual --preferred-challenges dns -d {SITE},www.{SITE}
 
 6. [optional] create database
 	MySQL
@@ -70,4 +72,4 @@ Examples:
 	chmod -R 0750 /var/www/{SITE}/public/uploads
 
 8. if you generated an SSL certificate in step 5, generate it again to setup for auto renewal
-	certbot certonly -a webroot --webroot-path=/var/www/SITE/public -d SITE,www.SITE
+	certbot certonly -a webroot --webroot-path=/var/www/{SITE}/public -d {SITE},www.{SITE}
