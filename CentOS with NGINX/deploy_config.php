@@ -1,7 +1,7 @@
 <?php
 /*
 Notes:
-- replace {USER} and {GIT_REPO_NAME} with appropriate values
+- replace {USER}, {GIT_REPO_NAME} and {DEPLOY_SECRET_KEY} with appropriate values
 - {USER} should be prefixed with "site__", e.g. site__sozitje_hrastnik_si
 */
 
