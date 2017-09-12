@@ -32,9 +32,9 @@ Note:
 	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git --git-dir=/var/ssh/.git_{USER} --work-tree=/var/www/{SITE} checkout production'
 	ssh-agent bash -c 'ssh-add /var/ssh/{USER}_deploy_key; git --git-dir=/var/ssh/.git_{USER} --work-tree=/var/www/{SITE} pull'
 	
-#4. set deploy secret
+#4. set config
 	
-	# set random string in /var/www/{SITE}/.deploy_secret file
+	# copy deploy_config.php to /var/www/{SITE}/ and replace appropriate values
 
 #5. change owners
 	chown -R {USER}:{USER} /var/ssh/.git_{USER}
@@ -51,7 +51,7 @@ Note:
 	# should be Gogs type webhook
 	# enter https://{SITE}/deploy.php under Payload URL
 	# select application/x-www-form-urlencoded under Content Type
-	# enter string from .deploy_secret under Secret
+	# enter deploy_secret_key (from deploy_config.php) under Secret
 	# click Add Webhook
 
 #8. test webhook

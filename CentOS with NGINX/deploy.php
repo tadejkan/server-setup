@@ -1,11 +1,7 @@
 <?php
 /*
-Notes:
-- replace {USER} and {GIT_REPO_NAME} with appropriate values
-- {USER} should be prefixed with "site__", e.g. site__sozitje_hrastnik_si
-*/
+Note: requires presence of deploy_config.php file, in parent directory of this file
 
-/*
 TO FUNCTION CORRECTLY, THIS SCRIPT REQUIRES:
 
 - installed Composer globally:
@@ -17,14 +13,15 @@ TO FUNCTION CORRECTLY, THIS SCRIPT REQUIRES:
 
 set_time_limit(0);
 
-$my_secret = trim(file_get_contents('../.deploy_secret'));
+$config = require('../deploy_config.php');
 
-$key           = realpath('/var/ssh/{USER}_deploy_key');
-$git_dir       = realpath('/var/ssh/.git_{USER}');
-$work_dir      = realpath('../' . '/');
-$log_file      = '../storage/logs/deploy.log';
-$repo_name     = '{GIT_REPO_NAME}';
-$composer_home = '/var/composer/{USER}';
+$my_secret     = $config['deploy_secret_key'];
+$key           = $config['key_filename'];
+$git_dir       = $config['git_dir'];
+$work_dir      = $config['working_dir'];
+$log_file      = $config['log_filename'];
+$repo_name     = $config['repo_name'];
+$composer_home = $config['composer_home'];
 
 $log = '';
 
