@@ -34,3 +34,5 @@ env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
+
+php_value[session.save_path] = /var/www/SITE/sessions

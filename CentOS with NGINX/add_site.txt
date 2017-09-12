@@ -23,7 +23,11 @@ Examples:
 	cp site.conf.template {SITE}.conf
 	# open file and replace SITE with {SITE} and USER with {USER}
 	# put config file on server
-	systemctl restart php-fpm.service # or php-53-fpm.service
+	
+	mkdir -p /var/www/{SITE}/sessions
+	chown -R {USER}:{USER} /var/www/{SITE}/sessions
+	
+	systemctl reload php-fpm.service # or php-53-fpm.service
 
 5. create NGINX vhost config file
 	cp site.conf.template {SITE}.conf # or copy from site-new-cms.conf.template, site-old-cms.conf.template or site-static.conf.template (if no PHP is needed and you skipped #4)
