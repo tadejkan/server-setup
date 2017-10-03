@@ -282,7 +282,7 @@ setenforce Permissive
 ############################
 
 # (replace {USERNAME} with a username and {SITE} with your site)
-sh -c "echo -n 'USERNAME:' >> /etc/nginx/.{SITE}-htpasswd"
+sh -c "echo -n '{USERNAME}:' >> /etc/nginx/.{SITE}-htpasswd"
 sh -c "openssl passwd -apr1 >> /etc/nginx/.{SITE}-htpasswd"
 
 # add this to SITE vhost under location
