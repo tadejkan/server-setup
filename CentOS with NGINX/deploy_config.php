@@ -3,6 +3,7 @@
 Notes:
 - replace {USER}, {GIT_REPO_NAME} and {DEPLOY_SECRET_KEY} with appropriate values
 - {USER} should be prefixed with "site__", e.g. site__sozitje_hrastnik_si
+- {GIT_REPO_NAME} should be name of git repo, e.g. sozitje-hrastnik.si
 */
 
 return array(
