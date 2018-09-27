@@ -182,7 +182,7 @@ mkdir /etc/nginx/vhosts
 # copy etc/nginx/nginx.conf to /etc/nginx/
 # copy etc/nginx/fastcgi_params to /etc/nginx/
 # copy etc/nginx/conf.d/gzip.conf to /etc/nginx/conf.d/
-# copy etc/nginx/vhosts/site.conf.template to /etc/nginx/vhosts/
+# copy etc/nginx/vhosts/*.template to /etc/nginx/vhosts/
 
 systemctl enable nginx.service
 
@@ -190,7 +190,7 @@ systemctl enable nginx.service
 ## START STUFF ##
 #################
 
-systemctl start php-fpm.service
+systemctl start php-fpm.service # will fail if there are no .conf files in /etc/php-fpm.d/
 systemctl start php-53-fpm.service
 #systemctl start php-52-fpm.service
 
@@ -241,6 +241,10 @@ su -c "psql -c \"ALTER USER postgres WITH PASSWORD 'yourpassword';\"" - postgres
 # CREATE DATABASE "yourdatabase";
 # REVOKE connect ON DATABASE "yourdatabase" FROM PUBLIC;
 
+##########
+## SWAP ##
+##########
+
 touch /var/swap.img
 chmod 600 /var/swap.img
 dd if=/dev/zero of=/var/swap.img bs=1024k count=1000
@@ -285,13 +289,18 @@ setenforce Permissive
 ## HOW TO SECURE A FOLDER ##
 ############################
 
-# (replace {USERNAME} with a username and {SITE} with your site)
-sh -c "echo -n '{USERNAME}:' >> /etc/nginx/.{SITE}-htpasswd"
-sh -c "openssl passwd -apr1 >> /etc/nginx/.{SITE}-htpasswd"
+mkdir /etc/nginx/secured-folders
 
-# add this to SITE vhost under location
+# (replace {USERNAME} with a username and {SITE} with your site)
+sh -c "echo -n '{USERNAME}:' >> /etc/nginx/secured-folders/.{SITE}-auth-basic-user-file"
+sh -c "openssl passwd -apr1 >> /etc/nginx/secured-folders/.{SITE}-auth-basic-user-file"
+
+# add this to SITE vhost under location (replace existing "location /" block)
     location / {
         try_files $uri $uri/ /index.php$is_args$args;
         auth_basic "DEV";
-        auth_basic_user_file /etc/nginx/.{SITE}-htpasswd;
+        auth_basic_user_file /etc/nginx/secured-folders/.{SITE}-auth-basic-user-file;
     }
+
+# reload nginx
+systemctl reload nginx.service
