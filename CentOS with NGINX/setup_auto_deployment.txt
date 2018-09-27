@@ -39,7 +39,7 @@ Note:
 #5. change owners
 	chown -R {USER}:{USER} /var/ssh/.git_{USER}
 	chown -R {USER}:{USER} /var/www/{SITE}
-	chmod -R 0750 /var/www/{SITE} # 7 needed as it gives write privilege to our user
+	chmod -R 0640 /var/www/{SITE} # 6 needed as it gives write privilege to our user
 
 #6. setup composer
 
