@@ -286,6 +286,12 @@ setenforce Permissive
 # to
 # SELINUX=permissive
 
+##################
+## SETUP BACKUP ##
+##################
+
+# go to https://github.com/tadejkan/server-backup and follow instructions
+
 ############################
 ## HOW TO SECURE A FOLDER ##
 ############################
