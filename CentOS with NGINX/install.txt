@@ -25,7 +25,8 @@ cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.mainline.el`rpm -q -
 ## INSTALL PHP 7 ##
 ###################
 
-yum -y install php70w php70w-opcache php70w-cli php70w-common php70w-mysqlnd php70w-pgsql php70w-mbstring php70w-gd php70w-mcrypt php70w-intl php70w-fpm php70w-xml
+yum -y install php71w php71w-opcache php71w-cli php71w-common php71w-mysqlnd php71w-pgsql php71w-mbstring php71w-gd php71w-mcrypt php71w-intl php71w-fpm php71w-xml
+# Meexo is currently not compatible with PHP 7.2, since that version removes mcrypt
 
 mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf.bck
 
