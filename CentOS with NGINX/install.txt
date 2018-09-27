@@ -35,6 +35,7 @@ mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf.bck
 
 # php.ini
 #    change upload_max_filesize = 2M to upload_max_filesize = 100M
+#    change post_max_size = 8M to post_max_size = 100M
 #    set cgi.fix_pathinfo=0
 
 systemctl enable php-fpm.service
