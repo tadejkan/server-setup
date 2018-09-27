@@ -56,6 +56,7 @@ if (sizeof($arr) >= 2 && sizeof($arr[1]) >= 1 && strlen(trim($arr[1][0])) > 0)
 	
 	foreach ($files_to_delete as $file)
 	{
+		$file = trim($file);
 		$file = realpath($work_dir . $file);
 		$output = `rm -f {$file} 2>&1`;
 		
