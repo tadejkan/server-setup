@@ -20,15 +20,15 @@ Examples:
 	chown -R {USER}:{USER} /var/www/{SITE}
 
 4. [optional] create PHP FPM pool config file (either for PHP 5.3 or 7.0)
-	cd /etc/php-fpm.d
 	cp site.conf.template {SITE}.conf
 	# open file and replace SITE with {SITE} and USER with {USER}
+	cd /etc/php-fpm.d # or cd /etc/opt/remi/php74/php-fpm.d
 	# put config file on server
 	
 	mkdir -p /var/www/{SITE}/sessions
 	chown -R {USER}:{USER} /var/www/{SITE}/sessions
 	
-	systemctl reload php-fpm.service # or php-53-fpm.service
+	systemctl reload php-fpm.service # or php-53-fpm.service or php74-php-fpm
 
 5. create NGINX vhost config file
 	cd /etc/nginx/vhosts
