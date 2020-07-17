@@ -49,7 +49,9 @@ Examples:
 	# 
 	# then you need to generate an SSL certificate for the site:
 	certbot certonly -a webroot --webroot-path=/var/www/{SITE}/public -d {SITE},www.{SITE}
-	#   or use alternative method, via DNS (but that's not auto renewable, or is it? check):
+	#   or use alternative method, via manually uploading needed files:
+	#       certbot certonly -a manual -d {SITE}
+	#   or use alternative method, via DNS:
 	#       certbot certonly --manual --preferred-challenges dns -d {SITE},www.{SITE}
 	systemctl reload nginx.service # maybe we need "restart", because of usermod; test!
 

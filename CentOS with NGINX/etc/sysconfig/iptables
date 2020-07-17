@@ -3,11 +3,12 @@
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [1:140]
 -A INPUT -i lo -j ACCEPT
--A INPUT -s 89.212.18.55/32 -j ACCEPT
+#-A INPUT -s YOUR_IP/32 -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 20 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 21 -j ACCEPT
+-A INPUT -p tcp -m tcp --dport 22 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 80 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 443 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 3690 -j ACCEPT
