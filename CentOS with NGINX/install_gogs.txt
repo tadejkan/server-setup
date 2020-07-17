@@ -42,7 +42,7 @@ mkdir -p custom/conf
 # REGISTER_EMAIL_CONFIRM = false
 # ENABLE_NOTIFY_MAIL     = false
 # ENABLE_CAPTCHA         = true
-# REQUIRE_SIGNIN_VIEW    = false
+# REQUIRE_SIGNIN_VIEW    = true
 # 
 # [mailer]
 # ENABLED = false
