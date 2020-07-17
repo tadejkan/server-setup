@@ -56,4 +56,4 @@ Note:
 
 #8. test webhook
 	
-	# select added webhook and select Test Delivery
+	# make sure you finished setting up the site (e.g. filled out .env file, restored DB) and open added webhook and select Test Delivery
