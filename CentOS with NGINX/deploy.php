@@ -73,13 +73,12 @@ if (sizeof($arr) >= 2 && sizeof($arr[1]) >= 1 && strlen(trim($arr[1][0])) > 0)
 	}
 }
 
-$output = `cd ..; export COMPOSER_HOME={$composer_home} && composer install --no-dev 2>&1`;
-$log .= $output . "\n\n";
-file_put_contents($log_file, '[' . date(DATE_ISO8601) . '] executed composer install: ' . $output . "\n\n", FILE_APPEND);
-$output = `cd ..; php artisan vendor:publish 2>&1`;
+$php_bin = (PHP_MAJOR_VERSION >= 7 && PHP_MINOR_VERSION >= 2 ? 'php74' : 'php');
+
+$output = `cd ..; export COMPOSER_HOME={$composer_home} && {$php_bin} /usr/local/bin/composer install --no-dev 2>&1`;
 $log .= $output . "\n\n";
 file_put_contents($log_file, '[' . date(DATE_ISO8601) . '] executed vendor publish: ' . $output . "\n\n", FILE_APPEND);
-$output = `cd ..; php artisan migrate --force 2>&1`;
+$output = `cd ..; {$php_bin} artisan migrate --force 2>&1`;
 $log .= $output . "\n\n";
 file_put_contents($log_file, '[' . date(DATE_ISO8601) . '] executed forced migration: ' . $output . "\n\n", FILE_APPEND);
 
