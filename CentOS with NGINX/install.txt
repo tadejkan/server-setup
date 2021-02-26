@@ -12,20 +12,23 @@ passwd --lock root
 ## BASIC SETUP ##
 #################
 
-yum -y update
+dnf -y update
 
-yum -y install wget nano mlocate
+dnf -y install wget nano mlocate
 
-rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+dnf config-manager --set-enabled PowerTools
+dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+
+# only for PHP 7.2 and PHP 7.1
 rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
-cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
-cd /etc/yum.repos.d && wget https://repo.codeit.guru/codeit.mainline.el`rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release)`.repo
+
+mkdir /var/run/php-fpm
 
 ###################
 ## INSTALL PHP 7 ##
 ###################
 
-yum -y install php71w php71w-opcache php71w-cli php71w-common php71w-mysqlnd php71w-pgsql php71w-mbstring php71w-gd php71w-mcrypt php71w-intl php71w-fpm php71w-xml
+dnf -y install php71w php71w-opcache php71w-cli php71w-common php71w-mysqlnd php71w-pgsql php71w-mbstring php71w-gd php71w-mcrypt php71w-intl php71w-fpm php71w-xml
 # Meexo is currently not compatible with PHP 7.2, since that version removes mcrypt
 
 mv /etc/php-fpm.d/www.conf /etc/php-fpm.d/www.conf.bck
@@ -43,8 +46,8 @@ systemctl enable php-fpm.service
 #####################
 ## INSTALL PHP 7.4 ##
 #####################
-yum -y install http://rpms.remirepo.net/enterprise/remi-release-7.rpm
-yum -y install php74-php-fpm php74-php-opcache php74-php-cli php74-php-common php74-php-mysqlnd php74-php-pgsql php74-php-mbstring php74-php-gd php74-php-mcrypt php74-php-intl php74-php-fpm php74-php-xml php74-php-zip
+dnf -y install http://rpms.remirepo.net/enterprise/remi-release-8.rpm
+dnf -y install php74-php-fpm php74-php-opcache php74-php-cli php74-php-common php74-php-mysqlnd php74-php-pgsql php74-php-mbstring php74-php-gd php74-php-mcrypt php74-php-intl php74-php-fpm php74-php-xml php74-php-zip
 systemctl enable php74-php-fpm
 
 # copy php-7.4/pool/site.conf.template to /etc/opt/remi/php74/php-fpm.d/
@@ -59,8 +62,8 @@ systemctl enable php74-php-fpm
 ## INSTALL PHP 5.3 ##
 #####################
 
-yum -y groupinstall 'Development Tools'
-yum -y install libxml2-devel libXpm-devel gmp-devel libicu-devel t1lib-devel aspell-devel openssl-devel bzip2-devel libcurl-devel libjpeg-devel libvpx-devel libpng-devel freetype-devel readline-devel libtidy-devel libxslt-devel libmcrypt-devel pcre-devel curl-devel mysql-devel ncurses-devel gettext-devel net-snmp-devel libevent-devel libtool-ltdl-devel libc-client-devel postgresql-devel
+dnf -y groupinstall 'Development Tools'
+dnf -y install libxml2-devel libXpm-devel gmp-devel libicu-devel t1lib-devel aspell-devel openssl-devel bzip2-devel libcurl-devel libjpeg-devel libvpx-devel libpng-devel freetype-devel readline-devel libtidy-devel libxslt-devel libmcrypt-devel pcre-devel curl-devel mysql-devel ncurses-devel gettext-devel net-snmp-devel libevent-devel libtool-ltdl-devel libc-client-devel postgresql-devel
 
 cd /root/
 wget http://at1.php.net/distributions/php-5.3.29.tar.gz
@@ -190,7 +193,25 @@ systemctl enable php-53-fpm.service
 ## INSTALL NGINX ##
 ###################
 
-yum -y install nginx nginx-module-geoip nginx-module-image-filter nginx-module-njs nginx-module-xslt
+nano /etc/yum.repos.d/nginx.repo
+# paste this:
+# [nginx-stable]
+# name=nginx stable repo
+# baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+# gpgcheck=1
+# enabled=1
+# gpgkey=https://nginx.org/keys/nginx_signing.key
+# module_hotfixes=true
+# 
+# [nginx-mainline]
+# name=nginx mainline repo
+# baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+# gpgcheck=1
+# enabled=0
+# gpgkey=https://nginx.org/keys/nginx_signing.key
+# module_hotfixes=true
+
+dnf -y install nginx nginx-module-image-filter nginx-module-njs nginx-module-xslt
 
 mkdir /etc/nginx/vhosts
 
@@ -215,18 +236,20 @@ systemctl start nginx.service
 ## INSTALL IPTABLES ##
 ######################
 
-yum -y install iptables-services
+dnf -y install iptables-services
 
 # copy etc/sysconfig/iptables to /etc/sysconfig/
 
 systemctl enable iptables.service
 systemctl start iptables.service
 
+systemctl disable firewalld.service
+
 ###########
 ## MYSQL ##
 ###########
 
-yum -y install mariadb mariadb-libs mariadb-server
+dnf -y install mariadb mariadb-server
 systemctl enable mariadb.service
 systemctl start mariadb.service
 # mysql_secure_installation
@@ -237,17 +260,17 @@ systemctl start mariadb.service
 ## POSTGRESQL ##
 ################
 
-yum -y install https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm
-yum -y install postgresql11 postgresql11-server postgresql11-contrib
+dnf -y install https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+dnf -qy module disable postgresql
+dnf -y install postgresql13-server postgresql13-contrib
 
-systemctl enable postgresql-11.service
-/usr/pgsql-11/bin/postgresql-11-setup initdb
+systemctl enable postgresql-13.service
+/usr/pgsql-13/bin/postgresql-13-setup initdb
 
-sed -i "s/#listen_addresses.*/listen_addresses = '*'/" /var/lib/pgsql/11/data/postgresql.conf
-sed -i "s/host    all             all             127.0.0.1\/32            ident.*/host    all         all         0.0.0.0\/0    md5/" /var/lib/pgsql/11/data/pg_hba.conf
-sed -i "s/host    all             all             ::1\/128                 ident.*/host    all             all             ::1\/128                 md5/" /var/lib/pgsql/11/data/pg_hba.conf
+sed -i "s/#listen_addresses.*/listen_addresses = '*'/" /var/lib/pgsql/13/data/postgresql.conf
+sed -i "s/host    all             all             127.0.0.1\/32            scram-sha-256.*/host    all             all           0.0.0.0\/0                 scram-sha-256/" /var/lib/pgsql/13/data/pg_hba.conf
 
-systemctl start postgresql-11.service
+systemctl start postgresql-13.service
 
 su -c "psql -c \"ALTER USER postgres WITH PASSWORD 'yourpassword';\"" - postgres # don't forget to change it to your password
 
@@ -271,7 +294,7 @@ echo "/var/swap.img    none    swap    sw    0    0" >> /etc/fstab
 ## REDIS ##
 ###########
 
-yum -y install redis
+dnf -y install redis
 systemctl enable redis.service
 systemctl start redis.service
 
@@ -279,7 +302,7 @@ systemctl start redis.service
 ## Let's Encrypt ##
 ###################
 
-yum -y install epel-release certbot
+dnf -y install epel-release certbot
 
 mkdir /etc/nginx/ssl
 openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048
@@ -290,16 +313,6 @@ openssl dhparam -out /etc/nginx/ssl/dhparam.pem 2048
 
 echo "30 2 * * * PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin && date >> /var/log/certbot.log && /usr/bin/certbot renew >> /var/log/certbot.log" >> /var/spool/cron/root
 echo "45 2 * * * /usr/bin/systemctl reload nginx.service" >> /var/spool/cron/root
-
-#############
-## SELINUX ##
-#############
-
-setenforce Permissive
-#nano /etc/sysconfig/selinux and change
-# SELINUX=disabled
-# to
-# SELINUX=permissive
 
 ##################
 ## SETUP BACKUP ##
