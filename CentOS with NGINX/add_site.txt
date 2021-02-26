@@ -79,6 +79,7 @@ Examples:
 	chmod -R 0550 /var/www/{SITE}
 	chmod -R 0750 /var/www/{SITE}/storage
 	chmod -R 0750 /var/www/{SITE}/public/uploads
+	chmod -R 0750 /var/www/{SITE}/bootstrap/cache
 
 8. if you generated an SSL certificate in step 5 using DNS method, generate it again to setup for auto renewal
 	certbot certonly -a webroot --webroot-path=/var/www/{SITE}/public -d {SITE},www.{SITE}
